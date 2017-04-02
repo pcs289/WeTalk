@@ -18,7 +18,7 @@ class ContactsViewController: UITableViewController, UISearchResultsUpdating{
     
     var contactsHandle: FIRDatabaseHandle?
     
-    let searchController = UISearchController(searchResultsController: nil)
+    var searchController = UISearchController(searchResultsController: nil)
     var filterNames = [NSDictionary]()
     
     
@@ -28,18 +28,19 @@ class ContactsViewController: UITableViewController, UISearchResultsUpdating{
     
     func filterContentForSearchText(searchText: String, scope: String = "All") {
         
-      
-        self.ref.child("users").queryOrderedByChild("displayName").queryEqualToValue(searchText.lowercaseString).observeSingleEventOfType(.Value) { (snapshot: FIRDataSnapshot) in
-            
-            if snapshot.exists(){
-                let dic = snapshot.value! as! NSDictionary
-                let disp = dic.allValues[0]["displayName"] as! String
-                self.filterNames.append(["displayName": disp, "contactId": dic.allKeys[0]])
-                self.tableView.reloadData()
+        if searchText.characters.count >= 2 {
+            self.ref.child("users").queryOrderedByChild("displayName").queryEqualToValue(searchText.lowercaseString).observeSingleEventOfType(.Value) { (snapshot: FIRDataSnapshot) in
+                
+                if snapshot.exists(){
+                    let dic = snapshot.value! as! NSDictionary
+                    let disp = dic.allValues[0]["displayName"] as! String
+                    self.filterNames.append(["displayName": disp, "contactId": dic.allKeys[0]])
+                    self.tableView.reloadData()
+                }
             }
+            
+            tableView.reloadData()
         }
-        
-        tableView.reloadData()
     }
     
     override func viewWillDisappear(animated: Bool) {
@@ -79,14 +80,15 @@ class ContactsViewController: UITableViewController, UISearchResultsUpdating{
         self.ref.child("users/\(self.userId)/contacts").updateChildValues([destinationId: true])
         
         
-        self.ref.child("users/\(self.userId)/chats").queryOrderedByKey().queryEqualToValue(destinationId).observeSingleEventOfType(.Value) { (snapshot: FIRDataSnapshot) in
+        self.ref.child("users/\(self.userId)/chats/\(destinationId)").observeSingleEventOfType(.Value) { (snapshot: FIRDataSnapshot) in
             
+            print(snapshot)
             
             if !snapshot.exists(){
                 
                 let now = NSDateFormatter.localizedStringFromDate(NSDate(), dateStyle: .NoStyle, timeStyle: .MediumStyle)
                 
-                let values:NSDictionary = ["details":["createdAt":now,"createdBy":self.userId] as NSDictionary,"members":[self.userId, destinationId] as Array<String>]
+                let values:NSDictionary = ["details":["createdAt":now,"createdBy":self.userId,"pendingRead": destinationId] as NSDictionary,"members":[self.userId, destinationId] as Array<String>]
                 
                 let newThreadRef = self.ref.child("chats").childByAutoId()
                 newThreadRef.setValue(values)
@@ -102,7 +104,7 @@ class ContactsViewController: UITableViewController, UISearchResultsUpdating{
                 
                 //print("already exists chat with this user")
                 
-                self.newChatId = snapshot.value![destinationId] as! String
+                self.newChatId = snapshot.value as! String
                 
             }
             
@@ -135,6 +137,8 @@ class ContactsViewController: UITableViewController, UISearchResultsUpdating{
 
        
     }
+    
+    
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         

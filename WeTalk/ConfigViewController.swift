@@ -9,6 +9,11 @@
 import UIKit
 import FirebaseAuth
 
+class ConfigViewCell: UITableViewCell{
+    @IBOutlet weak var name: UILabel!
+    @IBOutlet weak var arrow: UIImageView!
+}
+
 class ConfigViewController: UITableViewController {
     var handle:FIRAuthStateDidChangeListenerHandle?
     var list = ["Ayuda", "Perfil", "Notificaciones", "FAQ", "Sobre nosotros", "Donaciones", "Cerrar sesión"]
@@ -16,6 +21,8 @@ class ConfigViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        
+        self.tableView.tableFooterView = UIView(frame: CGRect.zero)
         self.navigationItem.title = "Configuración"
     }
     
@@ -32,12 +39,23 @@ class ConfigViewController: UITableViewController {
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return list.count
     }
+ 
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("configCell", forIndexPath: indexPath)
+        let cell = tableView.dequeueReusableCellWithIdentifier("configCell", forIndexPath: indexPath) as! ConfigViewCell
         
         // Configure the cell...
-        cell.textLabel?.text = list[indexPath.row]
+        cell.name.text = list[indexPath.row]
+        
+    
+        
+        if indexPath.row == self.list.count-1{
+            cell.backgroundColor = UIColor.blueColor()
+            cell.name.textColor = UIColor.whiteColor()
+            cell.name.textAlignment = .Center
+            cell.arrow.hidden = true
+        }
+    
         
         return cell
     }

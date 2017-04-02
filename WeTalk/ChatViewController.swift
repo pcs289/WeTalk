@@ -10,7 +10,7 @@ import UIKit
 import JSQMessagesViewController
 import Firebase
 
-class ChatViewController: JSQMessagesViewController {
+class ChatViewController: JSQMessagesViewController, UIAlertViewDelegate {
     
     let incomingBubble = JSQMessagesBubbleImageFactory().incomingMessagesBubbleImageWithColor(UIColor(red: 10/255, green: 180/255, blue: 230/255, alpha: 1.0))
     let outgoingBubble = JSQMessagesBubbleImageFactory().outgoingMessagesBubbleImageWithColor(UIColor.lightGrayColor())
@@ -27,10 +27,14 @@ class ChatViewController: JSQMessagesViewController {
         
         self.senderId = userId
         self.senderDisplayName = User.displayName
-        self.editButtonItem().title = "Enviar"
+        
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         
+        
+        self.inputToolbar.contentView.rightBarButtonItem.titleLabel?.text = "Enviar"
+
+        self.inputToolbar.contentView.textView.placeHolder = "Nuevo mensaje"
         if self.navigationController!.viewControllers.endIndex > 2{
             self.navigationController?.viewControllers.removeAtIndex(1)
         }
@@ -51,7 +55,7 @@ class ChatViewController: JSQMessagesViewController {
             let sender = snapshot.value!["senderId"] as! String
             let dispName = snapshot.value!["senderDisplayName"] as! String
             let content = snapshot.value!["content"] as! String
-            
+        
             self.messages += [JSQMessage(senderId: sender, displayName: dispName, text: content)]
             self.collectionView.reloadData()
         }
@@ -62,16 +66,77 @@ class ChatViewController: JSQMessagesViewController {
         // Dispose of any resources that can be recreated.
     }
     
+    
+    
     //MARK: User Input Methods
     override func didPressSendButton(button: UIButton!, withMessageText text: String!, senderId: String!, senderDisplayName: String!, date: NSDate!) {
         
-        if wordIsSpelledCorrect(text){
-            let messageValues: NSDictionary = ["content":text, "senderId": senderId, "senderDisplayName": senderDisplayName]
-            self.ref.child("chats").child(chatId).child("messages").childByAutoId().setValue(messageValues)
-            self.finishSendingMessage()
-        }else{
-            print(text," misspelled")
+        let wordsAr = text.characters.split{$0 == " "}.map(String.init)
+        var wrongWords = [String]()
+        
+        for word in wordsAr{
+            if !wordIsSpelledCorrect(word){
+               wrongWords.append(word)
+            }
         }
+        
+        if wrongWords.count > 0{
+            
+            var message = "Hay varias palabras mal escritas"
+            if wrongWords.count == 1{
+                message = "'\(wrongWords.first!)' está mal escrito"
+            }
+            
+            let alert = UIAlertController(title: "Error", message: message, preferredStyle:.Alert)
+            alert.addAction(UIAlertAction(title: "vaya...", style: .Destructive, handler: { (action: UIAlertAction) in
+                self.dismissViewControllerAnimated(true, completion: nil)
+            }))
+            
+            presentViewController(alert, animated: true, completion: nil)
+        }else{
+            
+            //Check for current user points
+            self.ref.child("users").child(userId).child("points").observeSingleEventOfType(.Value, withBlock: { (snapshot: FIRDataSnapshot) in
+                
+                if snapshot.exists(){
+                    //Add previous points & update
+                    let prevPoints = snapshot.value! as! Int
+                    let updatedPoints = prevPoints + self.calculatePointsFromArray(wordsAr)
+                    self.ref.child("users").child(self.userId).child("points").setValue(updatedPoints)
+                    
+                }else{
+                    //Set value for your first points!
+                    print("No points yet")
+                    let points = self.calculatePointsFromArray(wordsAr)
+                    
+                    self.ref.child("users").child(self.userId).child("points").setValue(points)
+                }
+                
+                //Send Message
+                let messageValues: NSDictionary = ["content":text, "senderId": senderId, "senderDisplayName": senderDisplayName]
+                self.ref.child("chats").child(self.chatId).child("messages").childByAutoId().setValue(messageValues)
+                
+                self.ref.child("chats").child(self.chatId).child("details").child("pendingRead").setValue(self.otherUserId)
+                
+                self.finishSendingMessage()
+                
+            })
+            
+            
+        }
+    }
+    
+    
+    func calculatePointsFromArray(ar: [String]) -> Int{
+        var p = 0
+        for elem: String in ar{
+            if elem.characters.count >= 5{
+                p = p + 3
+            }else{
+                p = p + 1
+            }
+        }
+        return p
     }
     
     override func didPressAccessoryButton(sender: UIButton!) {
@@ -79,6 +144,15 @@ class ChatViewController: JSQMessagesViewController {
     }
     
     func wordIsSpelledCorrect(word: String) -> Bool {
+        
+        if word.characters.count == 1{
+            if word == "y" || word == "a" || word == "e" || word == "u"{
+                return true
+            }else{
+                return false
+            }
+        }
+        
         let checker = UITextChecker()
         let range = NSMakeRange(0, word.characters.count)
         let wordRange = checker.rangeOfMisspelledWordInString(word, range: range, startingAt: 0, wrap: false, language: "es")

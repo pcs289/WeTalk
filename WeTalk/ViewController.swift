@@ -19,10 +19,6 @@ class ViewController: UIViewController {
         self.navigationController?.navigationBarHidden = false
     }
     
-    @IBAction func unwindToStart(segue: UIStoryboardSegue){
-        print("Logged Out")
-    }
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.

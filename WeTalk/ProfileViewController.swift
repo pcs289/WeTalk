@@ -18,6 +18,7 @@ class ProfileViewController: UIViewController, UIImagePickerControllerDelegate, 
     @IBOutlet weak var name: UILabel!
     @IBOutlet weak var email: UITextField!
     @IBOutlet weak var input: UITextField!
+    @IBOutlet weak var points: UILabel!
     @IBOutlet weak var profileImage: UIImageView!
     
     @IBAction func openCameraButton(sender: AnyObject) {
@@ -173,6 +174,15 @@ class ProfileViewController: UIViewController, UIImagePickerControllerDelegate, 
         
         self.ref.child("users").child(userId).child("fullName").observeSingleEventOfType(.Value, withBlock: { (snapshot: FIRDataSnapshot) in
             self.input.text = snapshot.value! as? String
+        })
+        
+        self.ref.child("users").child(userId).child("points").observeSingleEventOfType(.Value, withBlock: { (snapshot: FIRDataSnapshot) in
+            
+            if snapshot.exists(){
+                let points = snapshot.value! as! Int
+                self.points.text = "\(points) puntos acumulados"
+            }
+            
         })
         
         // Do any additional setup after loading the view.

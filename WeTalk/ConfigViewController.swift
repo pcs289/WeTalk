@@ -77,16 +77,10 @@ class ConfigViewController: UITableViewController {
             try FIRAuth.auth()?.signOut()
         }catch{}
         
-        if (User.alreadyLoggedIn == true){
-            User.reset()
-            let storyboard = UIStoryboard(name: "Main", bundle: nil)
-            let initialVC = storyboard.instantiateViewControllerWithIdentifier("initialVC")
-            self.presentViewController(initialVC, animated: true, completion: nil)
-            
-        }else{
-            User.reset()
-            self.performSegueWithIdentifier("unwindToStart", sender: self)
-        }
+        
+        
+        User.reset()
+        self.performSegueWithIdentifier("unwindToStart", sender: self)
         
         
 

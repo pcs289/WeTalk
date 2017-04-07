@@ -8,6 +8,7 @@
 
 import UIKit
 import Firebase
+import SVProgressHUD
 
 
 class customMainTableCell: UITableViewCell {
@@ -34,6 +35,9 @@ class MainTableViewController: UITableViewController {
     
     var conv = [NSDictionary]()
     
+
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -59,7 +63,9 @@ class MainTableViewController: UITableViewController {
             User.displayName = snapshot.value!.valueForKey("displayName")! as! String
         }
         
+        self.configNewThreadHandle()
         
+        self.configChatHandle()
         
         
     }
@@ -79,17 +85,7 @@ class MainTableViewController: UITableViewController {
         // Dispose of any resources that can be recreated.
     }
     
-    override func viewWillAppear(animated: Bool) {
-        
-        //Check for my UID in a newThreads pool to add the new conversation ID to my own node of chats in case I didn't start the conversation
-        newThreadHandle = self.ref.child("newThreads").child(userId!).observeEventType(.ChildAdded) { (snapshot: FIRDataSnapshot) in
-            
-            
-            self.ref.child("users").child(self.userId!).child("chats").child(snapshot.value as! String).setValue(snapshot.key)
-            self.ref.child("users").child(self.userId!).child("contacts").child(snapshot.value as! String).setValue(true)
-            
-        }
-        
+    func configChatHandle(){
         //Check for /newThreads on my own subnode to sync with client
         
         chatsHandle = self.ref.child("users").child(userId!).child("chats").observeEventType(.ChildAdded){ (snapshot: FIRDataSnapshot) in
@@ -113,13 +109,13 @@ class MainTableViewController: UITableViewController {
                             if (snapshot.key  != dict["otherUserId"] as! String){
                                 
                                 if (dic2.valueForKey("points") != nil) {
-                                
+                                    
                                     let values = ["displayName":dic2.valueForKey("displayName")! as! String, "chatId": snapshot.value! as! String, "otherUserId": snapshot.key, "otherUserPoints": dic2.valueForKey("points") as! Int]
                                     self.conv.append(values)
                                     self.tableView.reloadData()
-                               
+                                    
                                 }else{
-                               
+                                    
                                     let values = ["displayName":dic2.valueForKey("displayName")! as! String, "chatId": snapshot.value! as! String, "otherUserId": snapshot.key]
                                     self.conv.append(values)
                                     self.tableView.reloadData()
@@ -130,14 +126,31 @@ class MainTableViewController: UITableViewController {
                         
                     }else{
                         
-                            self.conv.append(["displayName":dic2.valueForKey("displayName")! as! String, "chatId": snapshot.value! as! String, "otherUserId": snapshot.key])
-                            self.tableView.reloadData()
-                    
+                        self.conv.append(["displayName":dic2.valueForKey("displayName")! as! String, "chatId": snapshot.value! as! String, "otherUserId": snapshot.key])
+                        self.tableView.reloadData()
+                        
                     }
                 })
             
         }
 
+    }
+    
+    func configNewThreadHandle() {
+        
+        //Check for my UID in a newThreads pool to add the new conversation ID to my own node of chats in case I didn't start the conversation
+        newThreadHandle = self.ref.child("newThreads").child(userId!).observeEventType(.ChildAdded) { (snapshot: FIRDataSnapshot) in
+            
+            
+            self.ref.child("users").child(self.userId!).child("chats").child(snapshot.value as! String).setValue(snapshot.key)
+            self.ref.child("users").child(self.userId!).child("contacts").child(snapshot.value as! String).setValue(true)
+            
+        }
+
+    }
+    
+    override func viewWillAppear(animated: Bool) {
+        
         
         handle = FIRAuth.auth()?.addAuthStateDidChangeListener(){(user, error) in
             
@@ -239,6 +252,8 @@ class MainTableViewController: UITableViewController {
             
             let chatId: String = self.conv[indexPath.row].valueForKey("chatId") as! String
             
+            User.currentChatId = chatId
+            
             
             self.ref.child("chats").child(chatId).child("details").child("pendingRead").observeSingleEventOfType(.Value, withBlock: { (snapshot: FIRDataSnapshot) in
                 
@@ -253,11 +268,35 @@ class MainTableViewController: UITableViewController {
                 
             })
             
-            self.performSegueWithIdentifier("chatSegue", sender: indexPath.row)
+            SVProgressHUD.setDefaultStyle(.Dark)
+            
+            SVProgressHUD.showWithStatus("Cargando...")
+            
+            self.ref.child("chats").child(chatId).observeSingleEventOfType(.Value, withBlock: { (snapshot: FIRDataSnapshot) in
+                print(snapshot.value! as! NSDictionary)
+                let arr = snapshot.value as! NSDictionary
+                for member in arr["members"] as! NSArray{
+                    if member as! String != User.userId{
+                        
+                        User.otherUserId = member as! String
+                        
+                        
+                        
+                        self.performSegueWithIdentifier("chatSegue", sender: indexPath.row)
+                        
+                        SVProgressHUD.dismiss()
+                        
+                    }
+                    
+                    
+                }
+            })
+
+            
+            
+            
         }
-        
     }
-    
 
     /*
     // Override to support conditional editing of the table view.
@@ -317,25 +356,12 @@ class MainTableViewController: UITableViewController {
             let vc:ChatViewController = segue.destinationViewController as! ChatViewController
             vc.senderId = currentUser?.uid
             vc.senderDisplayName = User.displayName
-            let chatId = self.conv[sender as! Int]["chatId"]! as! String
-        
-            self.ref.child("chats").child(chatId).observeSingleEventOfType(.Value, withBlock: { (snapshot: FIRDataSnapshot) in
-                print(snapshot.value! as! NSDictionary)
-                let arr = snapshot.value as! NSDictionary
-                for member in arr["members"] as! NSArray{
-                    if member as! String != User.userId{
-                        vc.otherUserId = member as! String
-                        
-                        vc.chatId = self.conv[sender as! Int]["chatId"] as! String
-                        
-                        vc.view.layoutIfNeeded()
-                    }
-                    
-                    
-                }
-            })
+            
             
         }
     }
+
+    
+    
 
 }

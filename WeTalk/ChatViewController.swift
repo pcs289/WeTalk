@@ -16,9 +16,9 @@ class ChatViewController: JSQMessagesViewController, UIAlertViewDelegate {
     let outgoingBubble = JSQMessagesBubbleImageFactory().outgoingMessagesBubbleImageWithColor(UIColor.lightGrayColor())
     var messages = [JSQMessage]()
     var userId = User.userId
-    var otherUserId: String = ""
+    var otherUserId: String = User.otherUserId
     let ref: FIRDatabaseReference = FIRDatabase.database().reference()
-    var chatId = ""
+    var chatId = User.currentChatId
     
     var messageHandler: FIRDatabaseHandle?
     
@@ -42,6 +42,7 @@ class ChatViewController: JSQMessagesViewController, UIAlertViewDelegate {
     
     
     override func viewDidAppear(animated: Bool) {
+        
         super.viewDidAppear(true)
         
         
@@ -72,11 +73,17 @@ class ChatViewController: JSQMessagesViewController, UIAlertViewDelegate {
     override func didPressSendButton(button: UIButton!, withMessageText text: String!, senderId: String!, senderDisplayName: String!, date: NSDate!) {
         
         let wordsAr = text.characters.split{$0 == " "}.map(String.init)
+        
+        print(wordsAr)
+        
         var wrongWords = [String]()
         
+        
         for word in wordsAr{
-            if !wordIsSpelledCorrect(word){
+
+            if !wordIsSpelledCorrect(word) || word.characters.count > 20{
                wrongWords.append(word)
+                print(wrongWords.count)
             }
         }
         
@@ -89,7 +96,7 @@ class ChatViewController: JSQMessagesViewController, UIAlertViewDelegate {
             
             let alert = UIAlertController(title: "Error", message: message, preferredStyle:.Alert)
             alert.addAction(UIAlertAction(title: "vaya...", style: .Destructive, handler: { (action: UIAlertAction) in
-                self.dismissViewControllerAnimated(true, completion: nil)
+                alert.dismissViewControllerAnimated(true, completion: nil)
             }))
             
             presentViewController(alert, animated: true, completion: nil)
@@ -146,6 +153,7 @@ class ChatViewController: JSQMessagesViewController, UIAlertViewDelegate {
     func wordIsSpelledCorrect(word: String) -> Bool {
         
         if word.characters.count == 1{
+            print("1 character")
             if word == "y" || word == "a" || word == "e" || word == "u"{
                 return true
             }else{
@@ -155,7 +163,7 @@ class ChatViewController: JSQMessagesViewController, UIAlertViewDelegate {
         
         let checker = UITextChecker()
         let range = NSMakeRange(0, word.characters.count)
-        let wordRange = checker.rangeOfMisspelledWordInString(word, range: range, startingAt: 0, wrap: false, language: "es")
+        let wordRange = checker.rangeOfMisspelledWordInString(word, range: range, startingAt: 0, wrap: false, language: "es_ES")
         
         return wordRange.location == NSNotFound
     }

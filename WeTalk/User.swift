@@ -12,10 +12,14 @@ struct User {
     static var alreadyLoggedIn: Bool = false
     static var displayName: String = ""
     static var userId: String = ""
+    static var otherUserId: String = ""
+    static var currentChatId: String = ""
     
     static func reset(){
         alreadyLoggedIn = false
         displayName = ""
         userId = ""
+        otherUserId = ""
+        currentChatId = ""
     }
 }

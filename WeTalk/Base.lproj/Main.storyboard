@@ -386,7 +386,7 @@
                                     <rect key="frame" x="0.0" y="0.0" width="600" height="86.5"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
-                                        <imageView userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="w0Z-ue-z82">
+                                        <imageView userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="profileThumb" translatesAutoresizingMaskIntoConstraints="NO" id="w0Z-ue-z82">
                                             <rect key="frame" x="8" y="8" width="70" height="70"/>
                                             <constraints>
                                                 <constraint firstAttribute="height" constant="70" id="Pno-oG-XWO"/>
@@ -696,6 +696,7 @@
     <resources>
         <image name="arrow" width="128" height="128"/>
         <image name="logo" width="2826" height="884"/>
+        <image name="profileThumb" width="70" height="70"/>
         <image name="redDot" width="1272" height="1270"/>
     </resources>
     <inferredMetricsTieBreakers>

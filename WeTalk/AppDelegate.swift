@@ -20,7 +20,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Override point for customization after application launch.
         FIRApp.configure()
         
-        FIRDatabase.database().persistenceEnabled = true
+        //FIRDatabase.database().persistenceEnabled = true
         
         self.storyboard =  UIStoryboard(name: "Main", bundle: NSBundle.mainBundle())
                
@@ -31,6 +31,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             User.alreadyLoggedIn = true
             
             self.window?.rootViewController = self.storyboard?.instantiateViewControllerWithIdentifier("main")
+        }else{
+            User.alreadyLoggedIn = false
         }
         
         

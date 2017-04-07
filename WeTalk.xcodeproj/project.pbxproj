@@ -153,6 +153,7 @@
 				TargetAttributes = {
 					5FBD19391E8D8A5500657932 = {
 						CreatedOnToolsVersion = 7.3.1;
+						DevelopmentTeam = 46Y96549E2;
 					};
 				};
 			};
@@ -365,7 +366,10 @@
 			baseConfigurationReference = F6B69DABBA6C10F37CED5322 /* Pods-WeTalk.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = WeTalk/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.ciclion.WeTalk;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -377,7 +381,11 @@
 			baseConfigurationReference = 4CBDC0820B614561B9E716CB /* Pods-WeTalk.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				ENABLE_BITCODE = NO;
+				ENABLE_TESTABILITY = YES;
 				INFOPLIST_FILE = WeTalk/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.ciclion.WeTalk;
 				PRODUCT_NAME = "$(TARGET_NAME)";

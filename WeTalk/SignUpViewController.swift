@@ -56,9 +56,17 @@ class SignUpViewController: UIViewController {
                 })
                 
             })
-        }else{
-            //Not email nor password length(>= 6)
         }
+        
+        if password.text?.characters.count < 6{
+            let alert = UIAlertController(title: "Error", message: "La contraseña debe tener al menos 6 caracteres", preferredStyle:.Alert)
+            alert.addAction(UIAlertAction(title: "Ok", style: .Destructive, handler: { (action: UIAlertAction) in
+                alert.dismissViewControllerAnimated(true, completion: nil)
+            }))
+            
+            presentViewController(alert, animated: true, completion: nil)
+        }
+
     }
     
     override func viewDidLoad() {

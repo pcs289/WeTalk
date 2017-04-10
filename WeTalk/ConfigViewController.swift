@@ -50,7 +50,8 @@ class ConfigViewController: UITableViewController {
     
         
         if indexPath.row == self.list.count-1{
-            cell.backgroundColor = UIColor.blueColor()
+        
+            cell.backgroundColor = UIColor(colorLiteralRed: 26/255, green: 36/255, blue: 96/255, alpha: 1)
             cell.name.textColor = UIColor.whiteColor()
             cell.name.textAlignment = .Center
             cell.arrow.hidden = true

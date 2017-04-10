@@ -50,8 +50,7 @@ class ChatViewController: JSQMessagesViewController, UIAlertViewDelegate {
             self.navigationItem.title = snapshot.value!["displayName"] as? String
         }
         
-        
-       messageHandler =  self.ref.child("chats").child(chatId).child("messages").observeEventType(.ChildAdded) { (snapshot: FIRDataSnapshot) in
+        messageHandler =  self.ref.child("chats").child(chatId).child("messages").observeEventType(.ChildAdded) { (snapshot: FIRDataSnapshot) in
             
             let sender = snapshot.value!["senderId"] as! String
             let dispName = snapshot.value!["senderDisplayName"] as! String

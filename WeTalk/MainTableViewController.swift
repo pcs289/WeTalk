@@ -86,7 +86,7 @@ class MainTableViewController: UITableViewController {
     }
     
     func configChatHandle(){
-        //Check for /newThreads on my own subnode to sync with client
+        //Check for /newThreads on my own subnode to sync the clients
         
         chatsHandle = self.ref.child("users").child(userId!).child("chats").observeEventType(.ChildAdded){ (snapshot: FIRDataSnapshot) in
             

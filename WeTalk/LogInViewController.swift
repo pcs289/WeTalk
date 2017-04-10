@@ -18,10 +18,33 @@ class LogInViewController: UIViewController {
     
     @IBAction func didForgotPassword(sender: AnyObject) {
         
+        
+        if email.text! != ""{
+            FIRAuth.auth()?.sendPasswordResetWithEmail(email.text!, completion: { (error: NSError?) in
+                print(error?.localizedDescription)
+                if error == nil{
+                    let alert = UIAlertController(title: "Link de reset enviado!", message: "Revisa tu email y haz click en el link para resetear tu contraseña", preferredStyle:.Alert)
+                    alert.addAction(UIAlertAction(title: "Ok", style: .Default, handler: { (action: UIAlertAction) in
+                        alert.dismissViewControllerAnimated(true, completion: nil)
+                    }))
+                    
+                    self.presentViewController(alert, animated: true, completion: nil)
+
+                }
+            })
+        }else{
+            let alert = UIAlertController(title: "Error", message: "Introduce el email asociado a tu cuenta", preferredStyle:.Alert)
+            alert.addAction(UIAlertAction(title: "Ok", style: .Default, handler: { (action: UIAlertAction) in
+                alert.dismissViewControllerAnimated(true, completion: nil)
+            }))
+            
+            self.presentViewController(alert, animated: true, completion: nil)
+        }
+        
     }
     
     @IBAction func didLogIn(sender: AnyObject) {
-        if email.text != "" && password.text != "" && password.text!.characters.count >= 6{
+        if email.text! != "" && password.text != "" && password.text!.characters.count >= 6{
             FIRAuth.auth()?.signInWithEmail(email.text!, password: password.text!, completion: { (user: FIRUser?, error) in
                 if error != nil{
                     print(error!.localizedDescription)
@@ -30,6 +53,15 @@ class LogInViewController: UIViewController {
                 User.userId = user!.uid
                 self.performSegueWithIdentifier("loginToMain", sender: self)
             })
+        }
+        
+        if password.text!.characters.count < 6{
+            let alert = UIAlertController(title: "Error", message: "La contraseña debe tener al menos 6 caracteres", preferredStyle:.Alert)
+            alert.addAction(UIAlertAction(title: "Ok", style: .Destructive, handler: { (action: UIAlertAction) in
+                alert.dismissViewControllerAnimated(true, completion: nil)
+            }))
+            
+            presentViewController(alert, animated: true, completion: nil)
         }
     }
     

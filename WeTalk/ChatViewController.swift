@@ -33,6 +33,8 @@ class ChatViewController: JSQMessagesViewController, UIAlertViewDelegate {
         
         
         self.inputToolbar.contentView.rightBarButtonItem.titleLabel?.text = "Enviar"
+        
+        self.inputToolbar.contentView.textView.autocorrectionType = .No
 
         self.inputToolbar.contentView.textView.placeHolder = "Nuevo mensaje"
         if self.navigationController!.viewControllers.endIndex > 2{

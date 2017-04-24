@@ -14,6 +14,7 @@ struct User {
     static var userId: String = ""
     static var otherUserId: String = ""
     static var currentChatId: String = ""
+    static var alreadyCheckedRegisterCode: Bool = false
     
     static func reset(){
         alreadyLoggedIn = false
